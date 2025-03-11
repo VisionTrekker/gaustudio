@@ -11,15 +11,18 @@ import uuid
 from plyfile import PlyData, PlyElement
 
 def fibonacci_sphere(samples=1):
+    """
+    在单位球面上生成samples个均匀分布的点
+    """
     points = []
     normals = []
-    phi = math.pi * (3. - math.sqrt(5.))  # golden angle in radians
+    phi = math.pi * (3. - math.sqrt(5.))  # golden angle in radians，黄金分割角（弧度）
 
-    for i in range(samples):
-        y = 1 - (i / float(samples - 1)) * 2  # y goes from 1 to -1
-        radius = math.sqrt(1 - y**2)  # radius at y
+    for i in range(samples):  # OpenCV标准坐标系
+        y = 1 - (i / float(samples - 1)) * 2  # y goes from 1 to -1，覆盖整个球的高度
+        radius = math.sqrt(1 - y**2)  # radius at y，根据高度计算半径
 
-        theta = phi * i  # golden angle increment
+        theta = phi * i  # golden angle increment，在经度上递增的 黄金分割角度
 
         x = math.cos(theta) * radius
         z = math.sin(theta) * radius
@@ -53,8 +56,8 @@ class GaussianSkyInitializer(PcdInitializer):
     
     def cache_dataset(self, dataset=None):
         num_background_points = self.resolution**2
-        xyz, normals = fibonacci_sphere(num_background_points)
-        xyz = np.array(xyz) * self.radius
+        xyz, normals = fibonacci_sphere(num_background_points)  # 单位圆上均匀分布的多个点
+        xyz = np.array(xyz) * self.radius   # 放大到指定球半径上
         
         # Create a structured array that includes vertex coordinates, normals, and colors
         vertex_data = np.zeros(xyz.shape[0], dtype=[
